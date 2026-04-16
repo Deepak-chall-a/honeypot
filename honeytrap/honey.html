@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>🍯 Honeypot Café</title>
+  <link href="bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{--bg:#0D1117;--bg2:#0f1923;--card:rgba(16,28,20,0.65);--green:#00FF88;--red:#FF2244;--yellow:#FFD700;--txt:#e0ffe8;--muted:#5a7a65;--border:rgba(0,255,136,0.22);--mono:'Share Tech Mono',monospace;--disp:'Orbitron',sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--txt);font-family:var(--mono);overflow-x:hidden;min-height:100vh}
+    body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.06) 2px,rgba(0,0,0,0.06) 4px);pointer-events:none;z-index:9999}
+    .navbar-c{background:rgba(13,17,23,0.97);border-bottom:1px solid var(--border);padding:.6rem 1.5rem;position:sticky;top:0;z-index:1000;backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:space-between}
+    .brand{font-family:var(--disp);font-weight:900;font-size:1.1rem;color:var(--green);text-shadow:0 0 12px rgba(0,255,136,0.5);letter-spacing:2px;text-decoration:none}
+    .brand span{color:var(--red)}
+    .search-box{background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.18);border-radius:4px;color:var(--green);font-family:var(--mono);font-size:.8rem;padding:.4rem 1rem;width:260px;outline:none;transition:.3s}
+    .search-box::placeholder{color:var(--muted)}
+    .search-box:focus{border-color:var(--green);box-shadow:0 0 10px rgba(0,255,136,0.18)}
+    .avatar-btn{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--green),#004422);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;box-shadow:0 0 10px rgba(0,255,136,0.35)}
+    .notif-dot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);animation:pulse-r 1.5s infinite}
+    @keyframes pulse-r{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+    .sidebar{background:rgba(10,16,12,0.92);border-right:1px solid var(--border);width:220px;min-height:calc(100vh - 57px);position:fixed;left:0;top:57px;padding:1.5rem 0;backdrop-filter:blur(8px);z-index:900}
+    .s-label{font-size:.65rem;color:var(--muted);letter-spacing:3px;padding:0 1.2rem;margin-bottom:.4rem;text-transform:uppercase}
+    .nav-it{display:flex;align-items:center;gap:.7rem;padding:.65rem 1.2rem;cursor:pointer;font-size:.85rem;color:var(--muted);border-left:3px solid transparent;transition:.2s;user-select:none}
+    .nav-it:hover{color:var(--green);background:rgba(0,255,136,0.05);border-left-color:var(--green)}
+    .nav-it.active{color:var(--green);background:rgba(0,255,136,0.08);border-left-color:var(--green);text-shadow:0 0 8px rgba(0,255,136,0.4)}
+    .badge-al{margin-left:auto;background:var(--red);color:#fff;font-size:.6rem;padding:1px 6px;border-radius:10px;box-shadow:0 0 8px var(--red);font-family:var(--mono)}
+    .main-c{margin-left:220px;padding:1.8rem 2rem 5rem;min-height:calc(100vh - 57px)}
+    .page{display:none}.page.active{display:block}
+    .page-sub{font-family:var(--disp);font-size:.7rem;letter-spacing:4px;color:var(--muted);text-transform:uppercase;margin-bottom:.2rem}
+    .page-h{font-family:var(--disp);font-size:1.5rem;font-weight:700;color:var(--green);text-shadow:0 0 18px rgba(0,255,136,0.35);margin-bottom:1.5rem}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.3rem 1.4rem;backdrop-filter:blur(16px);position:relative;overflow:hidden;transition:.3s}
+    .stat-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,255,136,0.04),transparent 60%);pointer-events:none}
+    .stat-card:hover{transform:translateY(-4px);box-shadow:0 8px 28px rgba(0,255,136,0.1)}
+    .stat-card.danger{border-color:rgba(255,34,68,.35)}.stat-card.danger::before{background:linear-gradient(135deg,rgba(255,34,68,.05),transparent 60%)}.stat-card.danger:hover{box-shadow:0 8px 28px rgba(255,34,68,.14)}
+    .stat-card.warn2{border-color:rgba(255,215,0,.28)}
+    .c-icon{font-size:1.8rem;margin-bottom:.6rem;display:block}
+    .c-label{font-size:.65rem;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem}
+    .c-val{font-family:var(--disp);font-size:2rem;font-weight:700;color:var(--green);line-height:1;text-shadow:0 0 14px rgba(0,255,136,.45)}
+    .c-val.red{color:var(--red);text-shadow:0 0 14px rgba(255,34,68,.45)}
+    .c-val.yel{color:var(--yellow);text-shadow:0 0 14px rgba(255,215,0,.45)}
+    .c-sub{font-size:.7rem;color:var(--muted);margin-top:.4rem}.c-sub .up{color:var(--green)}.c-sub .dn{color:var(--red)}
+    .corner-tag{position:absolute;top:.6rem;right:.7rem;font-size:.55rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase}
+    .risk-meter{height:6px;background:rgba(255,255,255,.07);border-radius:3px;margin-top:.7rem;overflow:hidden}
+    .risk-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--green),var(--yellow),var(--red));width:72%;transition:width 1s ease}
+    .chart-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.4rem;backdrop-filter:blur(16px);height:100%}
+    .chart-title{font-family:var(--disp);font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+    .chart-title::before{content:'';display:inline-block;width:8px;height:8px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:blink 1.5s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+    .feed-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.4rem;backdrop-filter:blur(16px)}
+    .feed-title{font-family:var(--disp);font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--red);margin-bottom:0;display:flex;align-items:center;gap:.5rem}
+    .feed-title::before{content:'';display:inline-block;width:8px;height:8px;background:var(--red);border-radius:50%;box-shadow:0 0 8px var(--red);animation:blink .8s infinite}
+    .feed-scroll{max-height:320px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--green) transparent}
+    .feed-scroll::-webkit-scrollbar{width:4px}.feed-scroll::-webkit-scrollbar-thumb{background:var(--green);border-radius:4px}
+    .feed-row{display:grid;grid-template-columns:145px 90px 1fr 80px;gap:.5rem;padding:.55rem .5rem;border-bottom:1px solid rgba(0,255,136,.06);font-size:.72rem;align-items:center;animation:slide-in .4s ease}
+    @keyframes slide-in{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+    .feed-row:hover{background:rgba(0,255,136,.04)}
+    .feed-row .ip{color:var(--green);font-weight:bold}.feed-row .t2{color:var(--muted)}
+    .feed-hdr{display:grid;grid-template-columns:145px 90px 1fr 80px;gap:.5rem;padding:.3rem .5rem .5rem;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid rgba(0,255,136,.15);margin-bottom:.3rem}
+    .fb{font-size:.6rem;padding:2px 7px;border-radius:3px;text-transform:uppercase;letter-spacing:1px;font-weight:bold}
+    .fb.sqli{background:rgba(255,34,68,.15);color:var(--red);border:1px solid rgba(255,34,68,.3)}
+    .fb.xss{background:rgba(255,215,0,.12);color:var(--yellow);border:1px solid rgba(255,215,0,.3)}
+    .fb.ssh{background:rgba(0,255,136,.1);color:var(--green);border:1px solid rgba(0,255,136,.25)}
+    .fb.port{background:rgba(100,100,255,.12);color:#9988ff;border:1px solid rgba(100,100,255,.3)}
+    .fb.ddos{background:rgba(255,100,0,.12);color:#ff8844;border:1px solid rgba(255,100,0,.3)}
+    .status-bar{background:rgba(0,0,0,.4);border-top:1px solid var(--border);padding:.35rem 2rem;font-size:.65rem;color:var(--muted);display:flex;gap:2rem;align-items:center;position:fixed;bottom:0;left:220px;right:0;z-index:800}
+    .status-bar .on{color:var(--green)}.status-bar .wr{color:var(--red)}
+    .sep{display:flex;align-items:center;gap:1rem;margin:1.8rem 0 1rem}
+    .sep span{font-family:var(--disp);font-size:.65rem;letter-spacing:4px;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+    .sep::before{content:'';flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--border))}
+    .sep::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--border),transparent)}
+    .g-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.4rem;backdrop-filter:blur(16px)}
+    .g-box h6{font-family:var(--disp);font-size:.7rem;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:1rem}
+    .lbl{font-size:.7rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;display:block}
+    .inp{background:rgba(0,255,136,.04);border:1px solid rgba(0,255,136,.18);border-radius:4px;color:var(--txt);font-family:var(--mono);font-size:.82rem;padding:.5rem .9rem;width:100%;outline:none;transition:.3s}
+    .inp:focus{border-color:var(--green);box-shadow:0 0 10px rgba(0,255,136,.15)}
+    .inp option{background:#0f1923}
+    textarea.inp{resize:vertical;min-height:80px}
+    .btn-g{background:transparent;border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:.8rem;padding:.5rem 1.4rem;border-radius:4px;cursor:pointer;transition:.25s;letter-spacing:1px}
+    .btn-g:hover{background:rgba(0,255,136,.12);box-shadow:0 0 14px rgba(0,255,136,.2)}
+    .btn-r{background:transparent;border:1px solid var(--red);color:var(--red);font-family:var(--mono);font-size:.8rem;padding:.5rem 1.4rem;border-radius:4px;cursor:pointer;transition:.25s}
+    .btn-r:hover{background:rgba(255,34,68,.1)}
+    .btn-y{background:transparent;border:1px solid var(--yellow);color:var(--yellow);font-family:var(--mono);font-size:.8rem;padding:.5rem 1.4rem;border-radius:4px;cursor:pointer;transition:.25s}
+    .btn-y:hover{background:rgba(255,215,0,.08)}
+    .toast-c{position:fixed;top:70px;right:20px;z-index:9998;display:flex;flex-direction:column;gap:.5rem}
+    .toast-it{background:#0f1923;border:1px solid var(--green);border-radius:6px;padding:.7rem 1.2rem;font-size:.78rem;color:var(--green);box-shadow:0 0 20px rgba(0,255,136,.2);animation:toast-in .3s ease;max-width:320px}
+    .toast-it.err{border-color:var(--red);color:var(--red)}.toast-it.info{border-color:var(--yellow);color:var(--yellow)}
+    @keyframes toast-in{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+    .trap-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.2rem;transition:.25s}
+    .trap-card:hover{border-color:rgba(0,255,136,.45)}
+    .t-status{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+    .t-status.on{background:var(--green);box-shadow:0 0 6px var(--green);animation:blink 2s infinite}
+    .t-status.off{background:var(--muted)}
+    .hp-table{width:100%;border-collapse:collapse;font-size:.78rem}
+    .hp-table th{color:var(--muted);font-size:.62rem;letter-spacing:2px;text-transform:uppercase;padding:.5rem .8rem;border-bottom:1px solid rgba(0,255,136,.15);text-align:left}
+    .hp-table td{padding:.6rem .8rem;border-bottom:1px solid rgba(0,255,136,.06);color:var(--txt)}
+    .hp-table tr:hover td{background:rgba(0,255,136,.03)}
+    .alert-it{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:1rem 1.2rem;margin-bottom:.7rem;display:flex;gap:1rem;align-items:flex-start;cursor:pointer;transition:.2s}
+    .alert-it:hover{border-color:rgba(0,255,136,.4)}
+    .alert-it.unread{border-left:3px solid var(--red)}
+    .alert-it.info-al{border-left:3px solid var(--yellow)}
+    .alert-it.ok{border-left:3px solid var(--green)}
+    .post-card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin-bottom:.9rem;transition:.2s}
+    .post-card:hover{border-color:rgba(0,255,136,.35)}
+    .post-vote{cursor:pointer;transition:.2s;padding:2px 6px;border-radius:3px;border:1px solid rgba(0,255,136,.2)}
+    .post-vote:hover{background:rgba(0,255,136,.08)}
+    .tab-row{display:flex;gap:.5rem;margin-bottom:1.2rem}
+    .tab-btn{background:transparent;border:1px solid rgba(0,255,136,.2);color:var(--muted);font-family:var(--mono);font-size:.75rem;padding:.4rem 1rem;border-radius:4px;cursor:pointer;transition:.2s;letter-spacing:1px}
+    .tab-btn.active,.tab-btn:hover{border-color:var(--green);color:var(--green);background:rgba(0,255,136,.07)}
+    .toggle-wrap{display:flex;align-items:center;justify-content:space-between;padding:.7rem 0;border-bottom:1px solid rgba(0,255,136,.07)}
+    .tog{position:relative;display:inline-block;width:40px;height:22px}
+    .tog input{opacity:0;width:0;height:0}
+    .tog-sl{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.1);border-radius:22px;transition:.3s;border:1px solid rgba(0,255,136,.2)}
+    .tog-sl:before{content:'';position:absolute;width:16px;height:16px;left:2px;top:2px;background:var(--muted);border-radius:50%;transition:.3s}
+    input:checked+.tog-sl{background:rgba(0,255,136,.2);border-color:var(--green)}
+    input:checked+.tog-sl:before{transform:translateX(18px);background:var(--green)}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center}
+    .modal-overlay.open{display:flex}
+    .modal-box{background:#0f1923;border:1px solid var(--border);border-radius:10px;padding:2rem;width:380px;max-width:90vw;box-shadow:0 0 40px rgba(0,255,136,.12)}
+    .modal-box h5{font-family:var(--disp);font-size:.85rem;color:var(--green);letter-spacing:2px;margin-bottom:1.2rem}
+    .s-wrap{position:relative}
+    .search-res{position:absolute;top:42px;left:0;background:#0f1923;border:1px solid var(--border);border-radius:6px;width:100%;z-index:500;box-shadow:0 8px 24px rgba(0,0,0,.5);display:none}
+    .search-res.open{display:block}
+    .s-res-it{padding:.55rem 1rem;font-size:.78rem;cursor:pointer;border-bottom:1px solid rgba(0,255,136,.06);transition:.15s}
+    .s-res-it:hover{background:rgba(0,255,136,.06);color:var(--green)}
+    @media(max-width:992px){.sidebar{display:none}.main-c{margin-left:0}.status-bar{left:0}}
+    @media(max-width:576px){.search-box{width:140px}}
+  </style>
+</head>
+<body>
+
+<div class="toast-c" id="toastC"></div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal-box">
+    <button style="background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;float:right" onclick="closeModal()">✕</button>
+    <h5>// USER PROFILE</h5>
+    <div style="text-align:center;margin-bottom:1.2rem">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--green),#004422);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto .6rem">👤</div>
+      <div style="font-size:.9rem;color:var(--green)">HunterX_01</div>
+      <div style="font-size:.7rem;color:var(--muted)">Security Analyst · Rank: Elite</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.2rem">
+      <div class="g-box" style="padding:.7rem;text-align:center"><div style="font-family:var(--disp);color:var(--green);font-size:1.2rem" id="modalPoints">9,340</div><div style="font-size:.6rem;color:var(--muted);letter-spacing:2px">POINTS</div></div>
+      <div class="g-box" style="padding:.7rem;text-align:center"><div style="font-family:var(--disp);color:var(--green);font-size:1.2rem" id="modalTraps">12</div><div style="font-size:.6rem;color:var(--muted);letter-spacing:2px">TRAPS</div></div>
+    </div>
+    <button class="btn-r" style="width:100%" onclick="toast('Logged out','err');closeModal()">⏻ Logout</button>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="navbar-c">
+  <a class="brand" href="#">🍯 HONEYPOT<span>CAFÉ</span></a>
+  <div class="s-wrap d-none d-md-block">
+    <input class="search-box" id="searchInput" type="text" placeholder="[ search threats, IPs, traps... ]" autocomplete="off" oninput="doSearch(this.value)" onblur="setTimeout(closeSearch,200)"/>
+    <div class="search-res" id="searchRes"></div>
+  </div>
+  <div class="d-flex align-items-center gap-3">
+    <span class="d-none d-sm-block" style="font-size:.7rem;color:var(--muted)">SYS: <span style="color:var(--green)">ONLINE</span></span>
+    <div class="position-relative" style="cursor:pointer" onclick="openModal()">
+      <div class="avatar-btn">👤</div>
+      <div class="notif-dot"></div>
+    </div>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="s-label mb-2">Navigation</div>
+  <div class="nav-it active" data-page="dashboard"><span style="width:20px;text-align:center">▣</span> Dashboard</div>
+  <div class="nav-it" data-page="deploy"><span style="width:20px;text-align:center">⚡</span> Deploy Trap</div>
+  <div class="nav-it" data-page="insights"><span style="width:20px;text-align:center">◈</span> Attack Insights</div>
+  <div class="nav-it" data-page="community"><span style="width:20px;text-align:center">◎</span> Community</div>
+  <div class="nav-it" data-page="alerts"><span style="width:20px;text-align:center">⚠</span> Alerts <span class="badge-al" id="alertBadge">7</span></div>
+  <div style="height:1px;background:var(--border);margin:1.2rem .8rem"></div>
+  <div class="s-label">System</div>
+  <div class="nav-it" data-page="settings"><span style="width:20px;text-align:center">⚙</span> Settings</div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-c">
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-sub">// cyber control panel</div>
+    <div class="page-h">DASHBOARD</div>
+    <div class="row g-3">
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card"><div class="corner-tag">live</div><span class="c-icon">🍯</span><div class="c-label">Active Honeypots</div><div class="c-val" id="statTraps">12</div><div class="c-sub"><span class="up">▲ 3</span> deployed this week</div></div>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card danger"><div class="corner-tag">24h</div><span class="c-icon">💀</span><div class="c-label">Total Attacks</div><div class="c-val red" id="statAttacks">4,821</div><div class="c-sub"><span class="dn">▲ +18%</span> vs yesterday</div></div>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card"><div class="corner-tag">total</div><span class="c-icon">⭐</span><div class="c-label">Points Earned</div><div class="c-val" id="statPoints">9,340</div><div class="c-sub"><span class="up">▲ +420</span> today</div></div>
+      </div>
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card warn2"><div class="corner-tag">live</div><span class="c-icon">🔴</span><div class="c-label">Risk Level</div><div class="c-val yel" id="statRisk">HIGH</div><div class="risk-meter"><div class="risk-fill" id="riskFill"></div></div><div class="c-sub" style="margin-top:.3rem" id="riskScore">72 / 100 threat score</div></div>
+      </div>
+    </div>
+    <div class="sep"><span>// analytics</span></div>
+    <div class="row g-3">
+      <div class="col-12 col-lg-7"><div class="chart-card"><div class="chart-title">Attacks Over Time</div><canvas id="lineChart" height="160"></canvas></div></div>
+      <div class="col-12 col-lg-5"><div class="chart-card"><div class="chart-title">Attack Type Distribution</div><canvas id="pieChart" height="160"></canvas></div></div>
+    </div>
+    <div class="sep"><span>// live attack feed</span></div>
+    <div class="feed-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+        <div class="feed-title">Incoming Threats — Real-Time</div>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn-r" style="font-size:.65rem;padding:.3rem .8rem" onclick="clearFeed()">CLEAR</button>
+          <button class="btn-g" style="font-size:.65rem;padding:.3rem .8rem" id="pauseBtn" onclick="togglePause()">PAUSE</button>
+        </div>
+      </div>
+      <div class="feed-hdr"><span>IP Address</span><span>Time</span><span>Attack Type</span><span>Type</span></div>
+      <div class="feed-scroll" id="feedScroll"></div>
+    </div>
+  </div>
+
+  <!-- DEPLOY TRAP -->
+  <div class="page" id="page-deploy">
+    <div class="page-sub">// honeypot management</div>
+    <div class="page-h">DEPLOY TRAP</div>
+    <div class="row g-3">
+      <div class="col-12 col-lg-5">
+        <div class="g-box">
+          <h6>New Honeypot Configuration</h6>
+          <div class="mb-3"><label class="lbl">Trap Name</label><input class="inp" id="trapName" type="text" placeholder="e.g. WebServer-Decoy-01"/></div>
+          <div class="mb-3"><label class="lbl">Trap Type</label>
+            <select class="inp" id="trapType"><option value="ssh">SSH Honeypot</option><option value="http">HTTP Web Server</option><option value="ftp">FTP Server</option><option value="sql">SQL Database</option><option value="rdp">RDP Server</option><option value="smtp">SMTP Mail Server</option></select>
+          </div>
+          <div class="mb-3"><label class="lbl">Fake IP / Domain</label><input class="inp" id="trapIP" type="text" placeholder="e.g. 192.168.1.100"/></div>
+          <div class="mb-3"><label class="lbl">Sensitivity Level</label>
+            <select class="inp" id="trapSens"><option>Low — Log only</option><option selected>Medium — Log + Alert</option><option>High — Log + Alert + Block</option></select>
+          </div>
+          <div class="mb-3"><label class="lbl">Notes</label><textarea class="inp" id="trapNotes" placeholder="Optional description..."></textarea></div>
+          <div class="d-flex gap-2">
+            <button class="btn-g" style="flex:1" onclick="deployTrap()">⚡ DEPLOY</button>
+            <button class="btn-r" onclick="clearDeploy()">RESET</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-7">
+        <div class="g-box">
+          <h6>Active Traps</h6>
+          <div style="overflow-x:auto">
+            <table class="hp-table"><thead><tr><th>Name</th><th>Type</th><th>IP</th><th>Hits</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="trapTbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ATTACK INSIGHTS -->
+  <div class="page" id="page-insights">
+    <div class="page-sub">// threat intelligence</div>
+    <div class="page-h">ATTACK INSIGHTS</div>
+    <div class="tab-row">
+      <button class="tab-btn active" onclick="insightTab(this,'tab-overview')">Overview</button>
+      <button class="tab-btn" onclick="insightTab(this,'tab-geo')">Top IPs</button>
+      <button class="tab-btn" onclick="insightTab(this,'tab-timeline')">Timeline</button>
+    </div>
+    <div id="tab-overview">
+      <div class="row g-3 mb-3">
+        <div class="col-6 col-md-3"><div class="stat-card" style="padding:.9rem"><div class="c-label">SQL Injection</div><div class="c-val" style="font-size:1.5rem">32%</div></div></div>
+        <div class="col-6 col-md-3"><div class="stat-card" style="padding:.9rem"><div class="c-label">XSS</div><div class="c-val" style="font-size:1.5rem">21%</div></div></div>
+        <div class="col-6 col-md-3"><div class="stat-card" style="padding:.9rem"><div class="c-label">SSH Brute</div><div class="c-val" style="font-size:1.5rem">18%</div></div></div>
+        <div class="col-6 col-md-3"><div class="stat-card danger" style="padding:.9rem"><div class="c-label">DDoS</div><div class="c-val red" style="font-size:1.5rem">14%</div></div></div>
+      </div>
+      <div class="row g-3">
+        <div class="col-12 col-lg-6"><div class="chart-card"><div class="chart-title">Weekly Attack Volume</div><canvas id="barChart" height="200"></canvas></div></div>
+        <div class="col-12 col-lg-6"><div class="chart-card"><div class="chart-title">Severity Breakdown</div><canvas id="sevChart" height="200"></canvas></div></div>
+      </div>
+    </div>
+    <div id="tab-geo" style="display:none">
+      <div class="g-box"><h6>Top Attacking IPs</h6>
+        <table class="hp-table"><thead><tr><th>#</th><th>IP Address</th><th>Country</th><th>Attacks</th><th>Type</th><th>Last Seen</th></tr></thead><tbody id="geoTbody"></tbody></table>
+      </div>
+    </div>
+    <div id="tab-timeline" style="display:none">
+      <div class="g-box"><h6>Attack Timeline (Last 7 Days)</h6><canvas id="timelineChart" height="120"></canvas></div>
+    </div>
+  </div>
+
+  <!-- COMMUNITY -->
+  <div class="page" id="page-community">
+    <div class="page-sub">// threat sharing network</div>
+    <div class="page-h">COMMUNITY</div>
+    <div class="row g-3">
+      <div class="col-12 col-lg-8">
+        <div class="g-box mb-3">
+          <h6>Share a Threat Report</h6>
+          <textarea class="inp" id="postInput" placeholder="Share attack intel, new techniques, or honeypot tips..." style="margin-bottom:.8rem"></textarea>
+          <div class="d-flex gap-2">
+            <select class="inp" id="postTag" style="width:auto;flex:0 0 auto"><option>SQLi</option><option>XSS</option><option>DDoS</option><option>General</option><option>SSH</option></select>
+            <button class="btn-g" style="flex:1" onclick="submitPost()">⬆ POST INTEL</button>
+          </div>
+        </div>
+        <div id="postFeed"></div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="g-box mb-3"><h6>Leaderboard</h6><div id="leaderboard"></div></div>
+        <div class="g-box"><h6>Online Analysts</h6><div id="onlineList"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="page" id="page-alerts">
+    <div class="page-sub">// notifications</div>
+    <div class="page-h">ALERTS</div>
+    <div style="display:flex;gap:.5rem;margin-bottom:1rem;align-items:center">
+      <button class="btn-g" style="font-size:.7rem;padding:.35rem .9rem" onclick="markAllRead()">✓ Mark All Read</button>
+      <button class="btn-r" style="font-size:.7rem;padding:.35rem .9rem" onclick="clearAlerts()">✕ Clear All</button>
+      <span style="font-size:.7rem;color:var(--muted);margin-left:.5rem" id="alertCount"></span>
+    </div>
+    <div id="alertFeed"></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="page-settings">
+    <div class="page-sub">// configuration</div>
+    <div class="page-h">SETTINGS</div>
+    <div class="row g-3">
+      <div class="col-12 col-lg-6">
+        <div class="g-box mb-3">
+          <h6>Notifications</h6>
+          <div class="toggle-wrap"><div><div style="font-size:.82rem;color:var(--txt)">Email Alerts</div><div style="font-size:.68rem;color:var(--muted)">Receive alerts via email</div></div><label class="tog"><input type="checkbox" checked onchange="stToggle('Email alerts',this.checked)"><span class="tog-sl"></span></label></div>
+          <div class="toggle-wrap"><div><div style="font-size:.82rem;color:var(--txt)">Critical Only Mode</div><div style="font-size:.68rem;color:var(--muted)">Alert only on CRIT severity</div></div><label class="tog"><input type="checkbox" onchange="stToggle('Critical only mode',this.checked)"><span class="tog-sl"></span></label></div>
+          <div class="toggle-wrap"><div><div style="font-size:.82rem;color:var(--txt)">Sound Alerts</div><div style="font-size:.68rem;color:var(--muted)">Play beep on new attack</div></div><label class="tog"><input type="checkbox" checked onchange="stToggle('Sound alerts',this.checked)"><span class="tog-sl"></span></label></div>
+          <div class="toggle-wrap"><div><div style="font-size:.82rem;color:var(--txt)">Desktop Notifications</div><div style="font-size:.68rem;color:var(--muted)">Browser push notifications</div></div><label class="tog"><input type="checkbox" onchange="stToggle('Desktop notifications',this.checked)"><span class="tog-sl"></span></label></div>
+        </div>
+        <div class="g-box">
+          <h6>Display</h6>
+          <div class="toggle-wrap"><div><div style="font-size:.82rem;color:var(--txt)">Scanline Effect</div><div style="font-size:.68rem;color:var(--muted)">CRT overlay</div></div><label class="tog"><input type="checkbox" checked id="togScanline" onchange="toggleScanline(this.checked)"><span class="tog-sl"></span></label></div>
+          <div class="toggle-wrap"><div><div style="font-size:.82rem;color:var(--txt)">Live Feed Auto-scroll</div><div style="font-size:.68rem;color:var(--muted)">Scroll to latest entry</div></div><label class="tog"><input type="checkbox" checked onchange="stToggle('Auto-scroll',this.checked)"><span class="tog-sl"></span></label></div>
+          <div class="toggle-wrap"><div><div style="font-size:.82rem;color:var(--txt)">Compact Mode</div><div style="font-size:.68rem;color:var(--muted)">Reduce padding &amp; spacing</div></div><label class="tog"><input type="checkbox" onchange="stToggle('Compact mode',this.checked)"><span class="tog-sl"></span></label></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-6">
+        <div class="g-box mb-3">
+          <h6>Profile Settings</h6>
+          <div class="mb-2"><label class="lbl">Display Name</label><input class="inp" id="profileName" value="HunterX_01"/></div>
+          <div class="mb-2"><label class="lbl">Email</label><input class="inp" id="profileEmail" type="email" value="hunter@cafe.sec"/></div>
+          <div class="mb-2"><label class="lbl">Timezone</label>
+            <select class="inp" id="profileTz"><option>UTC</option><option selected>UTC+5:30 (IST)</option><option>UTC-5 (EST)</option><option>UTC+1 (CET)</option></select>
+          </div>
+          <button class="btn-g" onclick="saveProfile()">SAVE PROFILE</button>
+        </div>
+        <div class="g-box">
+          <h6>System</h6>
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:.5rem">Version: <span style="color:var(--green)">HC-2.4.1</span></div>
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:.5rem">Session uptime: <span style="color:var(--green)" id="uptime">00:00:00</span></div>
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:1rem">API Status: <span style="color:var(--green)">● Connected</span></div>
+          <div class="d-flex gap-2 flex-wrap">
+            <button class="btn-y" onclick="exportData()">EXPORT DATA</button>
+            <button class="btn-r" onclick="resetData()">RESET DATA</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <span class="on">● LIVE</span>
+  <span>TRAPS: <span class="on" id="sbTraps">12 ACTIVE</span></span>
+  <span>UPTIME: <span class="on">99.8%</span></span>
+  <span class="wr">⚠ BLOCKED: <span id="sbBlocked">4,821</span></span>
+  <span style="margin-left:auto" id="clock"></span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ─── STATE ─── */
+let paused=false, attackCount=4821, trapCount=12, points=9340, uptimeS=0;
+let alertsData=[
+  {type:'unread',icon:'🚨',title:'Critical SQLi attack on DB-Decoy-01',meta:'IP: 185.220.101.47 · SQL Honeypot',time:'2m ago'},
+  {type:'unread',icon:'🚨',title:'DDoS flood detected — 980 req/s',meta:'IP: 198.54.117.89 · HTTP Trap',time:'8m ago'},
+  {type:'info-al',icon:'⚠',title:'New attacker fingerprinted',meta:'IP: 77.247.110.22 · First seen today',time:'15m ago'},
+  {type:'unread',icon:'🚨',title:'Port scan from 5 IPs simultaneously',meta:'Multiple honeypots affected',time:'22m ago'},
+  {type:'ok',icon:'✅',title:'Trap SSH-Honeypot-02 deployed successfully',meta:'Status: Active · Sensitivity: High',time:'1h ago'},
+  {type:'info-al',icon:'⚠',title:'XSS attempt blocked by WAF',meta:'IP: 45.142.212.100 · Web-Decoy',time:'1h ago'},
+  {type:'ok',icon:'✅',title:'Daily report generated',meta:'4,821 attacks logged in last 24h',time:'2h ago'},
+];
+let traps=[
+  {name:'SSH-Decoy-01',type:'ssh',ip:'192.168.1.10',hits:342,active:true},
+  {name:'WebServer-Trap',type:'http',ip:'10.0.0.55',hits:1204,active:true},
+  {name:'DB-Honeypot',type:'sql',ip:'172.16.0.8',hits:89,active:true},
+  {name:'FTP-Ghost',type:'ftp',ip:'10.0.1.22',hits:56,active:false},
+];
+let posts=[
+  {user:'0xShadowHunter',body:'New SQLi variant using unicode bypass found in our SSH trap. IOC: 185.220.x.x range. Patch your WAF immediately.',tag:'SQLi',votes:18,time:'14m ago'},
+  {user:'CyberBee_99',body:'Noticed a new SSH brute campaign hitting port 2222 instead of 22. Update your trap configs accordingly.',tag:'SSH',votes:12,time:'1h ago'},
+  {user:'NullByte_07',body:'Our XSS honeypot caught a new polyglot payload. Sharing the fingerprint in the community repo.',tag:'XSS',votes:9,time:'3h ago'},
+];
+
+/* ─── LOAD PROFILE ─── */
+function loadProfile(){
+  const name = localStorage.getItem('profileName') || 'HunterX_01';
+  const email = localStorage.getItem('profileEmail') || 'hunter@cafe.sec';
+  const tz = localStorage.getItem('profileTz') || 'UTC+5:30 (IST)';
+  document.getElementById('profileName').value = name;
+  document.getElementById('profileEmail').value = email;
+  document.getElementById('profileTz').value = tz;
+  // Update modal
+  const profileNameEl = document.querySelector('#profileModal .modal-box div[style*="font-size:.9rem"]');
+  if (profileNameEl) profileNameEl.textContent = name;
+}
+loadProfile();
+const geoData=[
+  {ip:'185.220.101.47',country:'🇷🇺 Russia',attacks:342,type:'SQLi',last:'2m ago'},
+  {ip:'45.142.212.100',country:'🇨🇳 China',attacks:284,type:'XSS',last:'8m ago'},
+  {ip:'198.54.117.89',country:'🇺🇸 USA',attacks:201,type:'DDoS',last:'15m ago'},
+  {ip:'103.75.190.33',country:'🇧🇷 Brazil',attacks:178,type:'SSH',last:'22m ago'},
+  {ip:'91.240.118.222',country:'🇩🇪 Germany',attacks:156,type:'PortScan',last:'1h ago'},
+  {ip:'77.247.110.22',country:'🇳🇱 Netherlands',attacks:134,type:'XSS',last:'1h ago'},
+  {ip:'222.186.42.15',country:'🇰🇷 S. Korea',attacks:98,type:'SQLi',last:'2h ago'},
+];
+const leaderboardData=[
+  {user:'0xShadowHunter',pts:14200},{user:'CyberBee_99',pts:9340},{user:'NullByte_07',pts:7890},{user:'PhantomNode',pts:6100},{user:'GridHacker',pts:4320},
+];
+const onlineUsers=['0xShadowHunter','PhantomNode','x0xBreach','w1reShark','NullByte_07'];
+const attackPool=[
+  {ip:'185.220.101.47',type:'SQL Injection',badge:'sqli'},{ip:'45.142.212.100',type:'XSS Payload',badge:'xss'},
+  {ip:'103.75.190.33',type:'SSH Brute Force',badge:'ssh'},{ip:'91.240.118.222',type:'Port Scan',badge:'port'},
+  {ip:'198.54.117.89',type:'DDoS Flood',badge:'ddos'},{ip:'222.186.42.15',type:'SQL Injection',badge:'sqli'},
+  {ip:'77.247.110.22',type:'XSS Payload',badge:'xss'},{ip:'193.32.162.44',type:'SSH Brute Force',badge:'ssh'},
+  {ip:'5.188.87.194',type:'Port Scan',badge:'port'},{ip:'89.248.165.96',type:'DDoS Flood',badge:'ddos'},
+];
+const searchIndex=[
+  {label:'Dashboard',page:'dashboard'},{label:'Deploy Trap',page:'deploy'},{label:'Attack Insights',page:'insights'},
+  {label:'Community',page:'community'},{label:'Alerts',page:'alerts'},{label:'Settings',page:'settings'},
+  {label:'SSH Honeypot config',page:'deploy'},{label:'SQL Injection stats',page:'insights'},
+  {label:'Top attacking IPs',page:'insights'},{label:'DDoS analysis',page:'insights'},
+  {label:'Leaderboard',page:'community'},{label:'Notification settings',page:'settings'},
+];
+
+/* ─── CLOCK & UPTIME ─── */
+setInterval(()=>{
+  document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-GB')+' UTC';
+  uptimeS++;
+  const h=String(Math.floor(uptimeS/3600)).padStart(2,'0');
+  const m=String(Math.floor((uptimeS%3600)/60)).padStart(2,'0');
+  const s=String(uptimeS%60).padStart(2,'0');
+  const el=document.getElementById('uptime');
+  if(el) el.textContent=`${h}:${m}:${s}`;
+},1000);
+
+/* ─── NAVIGATION ─── */
+document.querySelectorAll('.nav-it').forEach(el=>{
+  el.addEventListener('click',()=>{
+    const pg=el.dataset.page;
+    document.querySelectorAll('.nav-it').forEach(x=>x.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+pg).classList.add('active');
+    if(pg==='insights')initInsightCharts();
+    if(pg==='community')renderCommunity();
+    if(pg==='alerts')renderAlerts();
+    if(pg==='deploy')renderTrapTable();
+  });
+});
+
+/* ─── TOAST ─── */
+function toast(msg,type=''){
+  const t=document.createElement('div');
+  t.className='toast-it'+(type?' '+type:'');
+  t.textContent=(type==='err'?'✕ ':type==='info'?'ℹ ':'✓ ')+msg;
+  document.getElementById('toastC').appendChild(t);
+  setTimeout(()=>t.remove(),3200);
+}
+
+/* ─── MODAL ─── */
+function openModal(){
+  document.getElementById('modalPoints').textContent=points.toLocaleString();
+  document.getElementById('modalTraps').textContent=trapCount;
+  document.getElementById('profileModal').classList.add('open');
+}
+function closeModal(){document.getElementById('profileModal').classList.remove('open')}
+document.getElementById('profileModal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+
+/* ─── LIVE FEED ─── */
+const feedEl=document.getElementById('feedScroll');
+function tNow(){return new Date().toLocaleTimeString('en-GB')}
+function addRow(d){
+  if(paused)return;
+  const r=document.createElement('div');r.className='feed-row';
+  r.innerHTML=`<span class="ip">${d.ip}</span><span class="t2">${tNow()}</span><span>${d.type}</span><span><span class="fb ${d.badge}">${d.badge.toUpperCase()}</span></span>`;
+  feedEl.prepend(r);
+  while(feedEl.children.length>30)feedEl.removeChild(feedEl.lastChild);
+  attackCount++;points+=5;
+  document.getElementById('statAttacks').textContent=attackCount.toLocaleString();
+  document.getElementById('statPoints').textContent=points.toLocaleString();
+  document.getElementById('sbBlocked').textContent=attackCount.toLocaleString();
+  updateRisk();
+  // Randomly add alert for CRIT attacks
+  if(d.badge==='sqli'||d.badge==='ddos'){
+    if(Math.random()<0.15){
+      alertsData.unshift({type:'unread',icon:'🚨',title:`New ${d.type} from ${d.ip}`,meta:`Auto-detected · Severity: CRIT`,time:'just now'});
+      const b=document.getElementById('alertBadge');
+      b.textContent=alertsData.filter(a=>a.type==='unread').length;
+      b.style.display='inline';
+    }
+  }
+}
+[...attackPool].reverse().forEach(a=>addRow(a));
+setInterval(()=>{if(!paused)addRow(attackPool[Math.floor(Math.random()*attackPool.length)]);},2200);
+function clearFeed(){feedEl.innerHTML='';toast('Feed cleared')}
+function togglePause(){paused=!paused;document.getElementById('pauseBtn').textContent=paused?'RESUME':'PAUSE';toast(paused?'Feed paused':'Feed resumed',paused?'info':'');}
+function updateRisk(){
+  const score=Math.min(99,Math.round(50+attackCount/200));
+  document.getElementById('riskFill').style.width=score+'%';
+  document.getElementById('riskScore').textContent=score+' / 100 threat score';
+  document.getElementById('statRisk').textContent=score>80?'CRITICAL':score>60?'HIGH':score>40?'MEDIUM':'LOW';
+}
+
+/* ─── DASHBOARD CHARTS ─── */
+const lData=[120,95,210,380,540,470,620,810,740,930,860,1050];
+const lChart=new Chart(document.getElementById('lineChart').getContext('2d'),{
+  type:'line',
+  data:{labels:['00:00','02:00','04:00','06:00','08:00','10:00','12:00','14:00','16:00','18:00','20:00','22:00'],datasets:[{label:'Attacks',data:lData,borderColor:'#00FF88',backgroundColor:'rgba(0,255,136,0.08)',pointBackgroundColor:'#00FF88',pointRadius:4,pointHoverRadius:6,tension:.4,fill:true,borderWidth:2}]},
+  options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(13,17,23,.9)',borderColor:'#00FF88',borderWidth:1,titleColor:'#00FF88',bodyColor:'#e0ffe8',titleFont:{family:'Share Tech Mono'},bodyFont:{family:'Share Tech Mono'}}},scales:{x:{grid:{color:'rgba(0,255,136,.06)'},ticks:{color:'#5a7a65',font:{family:'Share Tech Mono',size:10}}},y:{grid:{color:'rgba(0,255,136,.06)'},ticks:{color:'#5a7a65',font:{family:'Share Tech Mono',size:10}}}}}
+});
+setInterval(()=>{lData.shift();lData.push(Math.floor(600+Math.random()*600));lChart.update();},8000);
+
+new Chart(document.getElementById('pieChart').getContext('2d'),{
+  type:'doughnut',
+  data:{labels:['SQL Injection','XSS','SSH Brute','Port Scan','DDoS'],datasets:[{data:[32,21,18,15,14],backgroundColor:['rgba(255,34,68,.75)','rgba(255,215,0,.75)','rgba(0,255,136,.75)','rgba(100,100,255,.75)','rgba(255,128,0,.75)'],borderColor:'#0D1117',borderWidth:3,hoverOffset:8}]},
+  options:{responsive:true,cutout:'60%',plugins:{legend:{position:'right',labels:{color:'#5a7a65',font:{family:'Share Tech Mono',size:10},padding:12,boxWidth:12}},tooltip:{backgroundColor:'rgba(13,17,23,.9)',borderColor:'#00FF88',borderWidth:1,titleColor:'#00FF88',bodyColor:'#e0ffe8',titleFont:{family:'Share Tech Mono'},bodyFont:{family:'Share Tech Mono'},callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed}%`}}}}
+});
+
+/* ─── DEPLOY TRAP ─── */
+function renderTrapTable(){
+  const tb=document.getElementById('trapTbody');tb.innerHTML='';
+  traps.forEach((t,i)=>{
+    tb.innerHTML+=`<tr>
+      <td>${t.name}</td>
+      <td><span style="font-size:.6rem;padding:2px 7px;border-radius:3px;text-transform:uppercase;border:1px solid rgba(0,255,136,.3);color:var(--green)">${t.type.toUpperCase()}</span></td>
+      <td style="color:var(--muted)">${t.ip}</td>
+      <td style="color:var(--yellow)">${t.hits}</td>
+      <td><span class="t-status ${t.active?'on':'off'}"></span>${t.active?'<span style="color:var(--green)">Active</span>':'<span style="color:var(--muted)">Inactive</span>'}</td>
+      <td>
+        <button class="btn-y" style="font-size:.6rem;padding:2px 8px" onclick="toggleTrap(${i})">${t.active?'STOP':'START'}</button>
+        <button class="btn-r" style="font-size:.6rem;padding:2px 8px;margin-left:4px" onclick="removeTrap(${i})">DEL</button>
+      </td></tr>`;
+  });
+  document.getElementById('statTraps').textContent=traps.filter(t=>t.active).length;
+  document.getElementById('sbTraps').textContent=traps.filter(t=>t.active).length+' ACTIVE';
+}
+function deployTrap(){
+  const name=document.getElementById('trapName').value.trim();
+  const type=document.getElementById('trapType').value;
+  const ip=document.getElementById('trapIP').value.trim();
+  if(!name){toast('Enter a trap name','err');return;}
+  if(!ip){toast('Enter a fake IP or domain','err');return;}
+  traps.push({name,type,ip,hits:0,active:true});
+  trapCount++;renderTrapTable();
+  toast(`Trap "${name}" deployed!`);clearDeploy();
+}
+function clearDeploy(){document.getElementById('trapName').value='';document.getElementById('trapIP').value='';document.getElementById('trapNotes').value='';}
+function removeTrap(i){const n=traps[i].name;traps.splice(i,1);trapCount--;renderTrapTable();toast(`"${n}" removed`,'err');}
+function toggleTrap(i){traps[i].active=!traps[i].active;renderTrapTable();toast(`"${traps[i].name}" ${traps[i].active?'started':'stopped'}`,traps[i].active?'':'info');}
+renderTrapTable();
+
+/* ─── INSIGHTS ─── */
+let insightDone=false;
+function initInsightCharts(){
+  if(insightDone)return;insightDone=true;
+  new Chart(document.getElementById('barChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{label:'Attacks',data:[430,610,520,780,920,380,1050],backgroundColor:'rgba(0,255,136,0.2)',borderColor:'#00FF88',borderWidth:1}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(13,17,23,.9)',borderColor:'#00FF88',borderWidth:1,titleColor:'#00FF88',bodyColor:'#e0ffe8',titleFont:{family:'Share Tech Mono'},bodyFont:{family:'Share Tech Mono'}}},scales:{x:{grid:{color:'rgba(0,255,136,.05)'},ticks:{color:'#5a7a65',font:{family:'Share Tech Mono',size:10}}},y:{grid:{color:'rgba(0,255,136,.05)'},ticks:{color:'#5a7a65',font:{family:'Share Tech Mono',size:10}}}}}
+  });
+  new Chart(document.getElementById('sevChart').getContext('2d'),{
+    type:'doughnut',
+    data:{labels:['Critical','High','Medium','Low'],datasets:[{data:[28,35,22,15],backgroundColor:['rgba(255,34,68,.8)','rgba(255,128,0,.8)','rgba(255,215,0,.7)','rgba(0,255,136,.7)'],borderColor:'#0D1117',borderWidth:2}]},
+    options:{responsive:true,cutout:'55%',plugins:{legend:{position:'right',labels:{color:'#5a7a65',font:{family:'Share Tech Mono',size:10},padding:10,boxWidth:10}},tooltip:{backgroundColor:'rgba(13,17,23,.9)',borderColor:'#00FF88',borderWidth:1,titleColor:'#00FF88',bodyColor:'#e0ffe8',titleFont:{family:'Share Tech Mono'},bodyFont:{family:'Share Tech Mono'}}}}
+  });
+  const tlLabels=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);tlLabels.push(d.toLocaleDateString('en-GB',{month:'short',day:'numeric'}));}
+  new Chart(document.getElementById('timelineChart').getContext('2d'),{
+    type:'line',
+    data:{labels:tlLabels,datasets:[{label:'Attacks',data:[310,490,420,680,810,590,1050],borderColor:'#FF2244',backgroundColor:'rgba(255,34,68,0.07)',pointBackgroundColor:'#FF2244',tension:.4,fill:true,borderWidth:2}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(13,17,23,.9)',borderColor:'#FF2244',borderWidth:1,titleColor:'#FF2244',bodyColor:'#e0ffe8',titleFont:{family:'Share Tech Mono'},bodyFont:{family:'Share Tech Mono'}}},scales:{x:{grid:{color:'rgba(255,34,68,.05)'},ticks:{color:'#5a7a65',font:{family:'Share Tech Mono',size:10}}},y:{grid:{color:'rgba(255,34,68,.05)'},ticks:{color:'#5a7a65',font:{family:'Share Tech Mono',size:10}}}}}
+  });
+  const gb=document.getElementById('geoTbody');
+  geoData.forEach((g,i)=>{gb.innerHTML+=`<tr><td style="color:var(--muted)">${i+1}</td><td style="color:var(--green)">${g.ip}</td><td>${g.country}</td><td style="color:var(--red)">${g.attacks}</td><td><span class="fb sqli" style="font-size:.58rem">${g.type}</span></td><td style="color:var(--muted)">${g.last}</td></tr>`;});
+}
+function insightTab(btn,id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  ['tab-overview','tab-geo','tab-timeline'].forEach(x=>document.getElementById(x).style.display='none');
+  document.getElementById(id).style.display='block';
+}
+
+/* ─── COMMUNITY ─── */
+function renderCommunity(){
+  const pf=document.getElementById('postFeed');pf.innerHTML='';
+  posts.forEach((p,i)=>{
+    pf.innerHTML+=`<div class="post-card">
+      <div style="font-size:.75rem;color:var(--green);margin-bottom:.3rem">▸ ${p.user} <span style="color:var(--muted);font-size:.65rem">[${p.tag}]</span></div>
+      <div style="font-size:.82rem;color:var(--txt);margin-bottom:.6rem;line-height:1.6">${p.body}</div>
+      <div style="font-size:.65rem;color:var(--muted);display:flex;gap:1rem;align-items:center">
+        <span>${p.time}</span>
+        <span class="post-vote" onclick="votePost(${i})">▲ ${p.votes}</span>
+        <span style="cursor:pointer" onclick="toast('Link copied!','info')">🔗 Share</span>
+      </div></div>`;
+  });
+  const lb=document.getElementById('leaderboard');lb.innerHTML='';
+  leaderboardData.forEach((l,i)=>{
+    lb.innerHTML+=`<div style="display:flex;align-items:center;gap:.6rem;padding:.45rem 0;border-bottom:1px solid rgba(0,255,136,.06)">
+      <span style="font-family:var(--disp);font-size:.8rem;color:${i===0?'var(--yellow)':'var(--muted)'};width:20px">${i+1}</span>
+      <span style="font-size:.78rem;flex:1;color:${i<2?'var(--green)':'var(--txt)'}">${l.user}</span>
+      <span style="font-size:.7rem;color:var(--muted)">${l.pts.toLocaleString()}</span></div>`;
+  });
+  const ol=document.getElementById('onlineList');ol.innerHTML='';
+  onlineUsers.forEach(u=>{
+    ol.innerHTML+=`<div style="display:flex;align-items:center;gap:.5rem;padding:.35rem 0;font-size:.78rem">
+      <span style="width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);flex-shrink:0"></span>${u}</div>`;
+  });
+}
+function votePost(i){posts[i].votes++;renderCommunity();toast('Upvoted!')}
+function submitPost(){
+  const txt=document.getElementById('postInput').value.trim();
+  const tag=document.getElementById('postTag').value;
+  if(!txt){toast('Write something first','err');return;}
+  posts.unshift({user:'HunterX_01',body:txt,tag,votes:1,time:'just now'});
+  document.getElementById('postInput').value='';
+  renderCommunity();toast('Intel posted!');
+}
+
+/* ─── ALERTS ─── */
+function renderAlerts(){
+  const af=document.getElementById('alertFeed');
+  if(!alertsData.length){af.innerHTML='<div style="text-align:center;color:var(--muted);padding:3rem;font-size:.85rem">No alerts — all clear 🟢</div>';return;}
+  af.innerHTML='';
+  alertsData.forEach((a,i)=>{
+    af.innerHTML+=`<div class="alert-it ${a.type}" onclick="ackAlert(${i})">
+      <div style="font-size:1.3rem;flex-shrink:0;margin-top:2px">${a.icon}</div>
+      <div style="flex:1"><div style="font-size:.82rem;color:var(--txt);margin-bottom:.2rem">${a.title}</div><div style="font-size:.68rem;color:var(--muted)">${a.meta}</div></div>
+      <div style="font-size:.65rem;color:var(--muted);flex-shrink:0">${a.time}</div></div>`;
+  });
+  const unread=alertsData.filter(a=>a.type==='unread').length;
+  document.getElementById('alertCount').textContent=`${unread} unread of ${alertsData.length} total`;
+  const b=document.getElementById('alertBadge');
+  b.textContent=unread||'';b.style.display=unread?'inline':'none';
+}
+function ackAlert(i){alertsData[i].type='ok';alertsData[i].icon='✅';renderAlerts();toast('Alert acknowledged')}
+function markAllRead(){alertsData.forEach(a=>{a.type='ok';a.icon='✅';});renderAlerts();toast('All alerts marked read')}
+function clearAlerts(){alertsData=[];renderAlerts();toast('All alerts cleared')}
+
+/* ─── SETTINGS ─── */
+function stToggle(name,val){toast(`${name}: ${val?'ON':'OFF'}`,val?'':'info')}
+function toggleScanline(on){document.body.classList.toggle('no-scanline', !on);toast(`Scanlines ${on?'enabled':'disabled'}`,on?'':'info');}
+function saveProfile(){
+  const name = document.getElementById('profileName').value;
+  const email = document.getElementById('profileEmail').value;
+  const tz = document.getElementById('profileTz').value;
+  // Update profile modal
+  const profileNameEl = document.querySelector('#profileModal .modal-box div[style*="font-size:.9rem"]');
+  if (profileNameEl) profileNameEl.textContent = name;
+  // Store in localStorage for persistence
+  localStorage.setItem('profileName', name);
+  localStorage.setItem('profileEmail', email);
+  localStorage.setItem('profileTz', tz);
+  toast('Profile saved ✓');
+}function exportData(){
+  const data = {
+    profile: {
+      name: localStorage.getItem('profileName') || 'HunterX_01',
+      email: localStorage.getItem('profileEmail') || 'hunter@cafe.sec',
+      tz: localStorage.getItem('profileTz') || 'UTC+5:30 (IST)'
+    },
+    stats: {
+      points: points,
+      trapCount: trapCount,
+      attackCount: attackCount,
+      uptime: uptimeS
+    },
+    traps: traps,
+    alerts: alertsData,
+    posts: posts,
+    exportDate: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `honey-cafe-data-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('Data exported successfully ✓');
+}
+function resetData(){
+  if(!confirm('This will reset all stats, traps, and alerts. Are you sure?')) return;
+  // Reset stats
+  points = 9340;
+  trapCount = 12;
+  attackCount = 4821;
+  uptimeS = 0;
+  // Reset arrays
+  alertsData = [
+    {type:'unread',icon:'🚨',title:'Critical SQLi attack on DB-Decoy-01',meta:'IP: 185.220.101.47 · SQL Honeypot',time:'2m ago'},
+    {type:'unread',icon:'🚨',title:'DDoS flood detected — 980 req/s',meta:'IP: 198.54.117.89 · HTTP Trap',time:'8m ago'},
+    {type:'info-al',icon:'⚠',title:'New attacker fingerprinted',meta:'IP: 77.247.110.22 · First seen today',time:'15m ago'},
+    {type:'unread',icon:'🚨',title:'Port scan from 5 IPs simultaneously',meta:'Multiple honeypots affected',time:'22m ago'},
+    {type:'ok',icon:'✅',title:'Trap SSH-Honeypot-02 deployed successfully',meta:'Status: Active · Sensitivity: High',time:'1h ago'},
+    {type:'info-al',icon:'⚠',title:'XSS attempt blocked by WAF',meta:'IP: 45.142.212.100 · Web-Decoy',time:'1h ago'},
+    {type:'ok',icon:'✅',title:'Daily report generated',meta:'4,821 attacks logged in last 24h',time:'2h ago'},
+  ];
+  traps = [
+    {name:'SSH-Decoy-01',type:'ssh',ip:'192.168.1.10',hits:342,active:true},
+    {name:'WebServer-Trap',type:'http',ip:'10.0.0.55',hits:1204,active:true},
+    {name:'DB-Honeypot',type:'sql',ip:'172.16.0.8',hits:89,active:true},
+    {name:'FTP-Ghost',type:'ftp',ip:'10.0.1.22',hits:56,active:false},
+  ];
+  posts = [
+    {user:'0xShadowHunter',body:'New SQLi variant using unicode bypass found in our SSH trap. IOC: 185.220.x.x range. Patch your WAF immediately.',tag:'SQLi',votes:18,time:'14m ago'},
+    {user:'CyberBee_99',body:'Noticed a new SSH brute campaign hitting port 2222 instead of 22. Update your trap configs accordingly.',tag:'SSH',votes:12,time:'1h ago'},
+    {user:'NullByte_07',body:'Our XSS honeypot caught a new polyglot payload. Sharing the fingerprint in the community repo.',tag:'XSS',votes:9,time:'3h ago'},
+  ];
+  // Update UI
+  document.getElementById('statTraps').textContent = trapCount;
+  document.getElementById('statAttacks').textContent = attackCount.toLocaleString();
+  document.getElementById('statPoints').textContent = points.toLocaleString();
+  document.getElementById('sbTraps').textContent = `${trapCount} ACTIVE`;
+  document.getElementById('sbBlocked').textContent = attackCount.toLocaleString();
+  document.getElementById('modalPoints').textContent = points.toLocaleString();
+  document.getElementById('modalTraps').textContent = trapCount;
+  renderAlerts();
+  renderTrapTable();
+  renderCommunity();
+  toast('All data reset to defaults','err');
+}
+/* ─── SEARCH ─── */
+function doSearch(q){
+  const res=document.getElementById('searchRes');
+  if(!q.trim()){res.classList.remove('open');return;}
+  const hits=searchIndex.filter(s=>s.label.toLowerCase().includes(q.toLowerCase()));
+  if(!hits.length){res.innerHTML='<div class="s-res-it" style="color:var(--muted)">No results found</div>';res.classList.add('open');return;}
+  res.innerHTML=hits.map(h=>`<div class="s-res-it" onclick="gotoPage('${h.page}','${h.label}')">${h.label}</div>`).join('');
+  res.classList.add('open');
+}
+function closeSearch(){document.getElementById('searchRes').classList.remove('open')}
+function gotoPage(pg,label){
+  document.getElementById('searchInput').value='';closeSearch();
+  document.querySelector(`[data-page="${pg}"]`).click();
+  toast(`Navigated to: ${label}`,'info');
+}
+</script>
+</body>
+</html>
